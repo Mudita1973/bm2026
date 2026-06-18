@@ -1,2 +1,2 @@
 # bm2026
-Timetable Burningman 2026
+Timetable Burning Mountain 2026
