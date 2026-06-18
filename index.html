@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BM2026">
+  <meta name="application-name" content="BM2026">
+  <meta name="theme-color" content="#080b14">
+  <link rel="apple-touch-icon" href="bm2026-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="bm2026-icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Burning Mountain 2026 – Vollständiger Zeitplan</title>
+<style>
+  :root {
+    --bg:#080b14; --surface:#0f1422; --border:#1e2a40;
+    --text:#d4daf0; --muted:#5a6688;
+    --aurum:#a855f7; --curame:#10b981; --prism:#3b82f6; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;padding:20px 14px 60px;max-width:700px;margin:0 auto;}
+  header{text-align:center;margin-bottom:22px;}
+  header h1{font-size:22px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+    background:linear-gradient(90deg,#c026d3,#8b5cf6,#3b82f6);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  header p{color:var(--muted);font-size:12px;margin-top:5px;}
+
+  .legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+  .dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+
+  .tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+  .tab{padding:9px 16px;border-radius:999px;border:1px solid var(--border);background:var(--surface);
+    color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;
+    -webkit-appearance:none;appearance:none;
+    -webkit-tap-highlight-color:rgba(147,197,253,0.2);
+    touch-action:manipulation;user-select:none;line-height:1.2;min-height:44px;
+    transition:all 0.18s;display:inline-flex;align-items:center;justify-content:center;}
+  .tab:active{transform:scale(0.96);}
+  .tab.active{background:#1e2a60;color:#93c5fd;border-color:var(--prism);}
+  .tab.active.ta{background:#2a1a4a;color:#c4b5fd;border-color:var(--aurum);}
+  .tab.active.tc{background:#0a2a1e;color:#6ee7b7;border-color:var(--curame);}
+  .tab.active.tp{background:#071828;color:#93c5fd;border-color:var(--prism);}
+  .tab.active.tr{background:#2a1800;color:#fcd34d;border-color:var(--warn);}
+
+  .stage-block{margin-bottom:24px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .stage-hdr{padding:9px 14px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+  .stage-hdr.aurum{background:#1a0a30;color:#c4b5fd;}
+  .stage-hdr.curame{background:#051a10;color:#6ee7b7;}
+  .stage-hdr.prism{background:#071828;color:#93c5fd;}
+  .day-hdr{padding:4px 14px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--muted);background:#0c111e;border-bottom:1px solid var(--border);}
+
+  /* ── ACT ROWS ── */
+  .act-row{display:grid;grid-template-columns:56px 1fr auto;align-items:start;
+    padding:8px 14px 8px 18px;border-bottom:1px solid #0f1728;background:var(--surface);
+    gap:10px;position:relative;}
+  .act-row:last-child{border-bottom:none;}
+  .act-row:hover{background:#121a2e;}
+
+  /* left rating bar */
+  .act-row::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0;
+  }
+  .act-row.rank9::before{background:#c026d3;}
+  .act-row.rank8::before{background:#2563eb;}
+  .act-row.rank7::before{background:#0891b2;}
+  .act-row.rankna::before{background:#1e2a40;}
+  .act-row.rankgpt::before{background:#252535;}
+
+  /* dim no-rating rows */
+  .act-row.rankna .act-name,.act-row.rankna .time{color:#3a4a60;font-weight:400;}
+  .act-row.rankna .act-comment{color:#2a3550;}
+  .act-row.rankgpt .act-name{color:#4a5570;}
+  .act-row.rankgpt .time{color:#3a4460;}
+
+  /* filter: hidden by rating filter */
+  .act-row.hidden-by-filter{display:none;}
+
+  .time{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:1px;}
+  .act-main{}
+  .act-name{font-size:13px;font-weight:600;color:var(--text);}
+  .act-comment{font-size:10px;color:var(--muted);line-height:1.35;margin-top:2px;}
+
+  /* ── DAY HEADERS with time-of-day color ── */
+  .day-hdr{padding:4px 14px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    color:var(--muted);border-bottom:1px solid var(--border);}
+  .day-hdr[data-day="thu"]{background:#0a0c14;}
+  .day-hdr[data-day="fri"]{background:#0a0c14;}
+  .day-hdr[data-day="sat"]{background:#0a0c14;}
+  .day-hdr[data-day="sun"]{background:#0a0c14;}
+
+  /* time-of-day sub-headers inserted by JS */
+  .tod-hdr{padding:2px 14px 2px 18px;font-size:9px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;border-bottom:1px solid #0f1220;}
+  .tod-night{background:#0c0814;color:#4a3a60;}   /* 00–06 */
+  .tod-morning{background:#0c1008;color:#3a5a30;}  /* 06–12 */
+  .tod-day{background:#0c100c;color:#3a6040;}      /* 12–18 */
+  .tod-evening{background:#10080c;color:#5a3a4a;}  /* 18–24 */
+
+  /* ── OVERLAP BADGES ── */
+  .overlap-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    margin-top:5px;padding:3px 7px;border-radius:5px;
+    font-size:10px;font-weight:700;cursor:pointer;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    transition:opacity 0.15s;
+  }
+  .overlap-badge:active{opacity:0.7;}
+  .ov-go{background:#0f2a10;color:#4ade80;border:1px solid #10b98155;}
+  .ov-maybe{background:#1a1a00;color:#facc15;border:1px solid #f59e0b55;}
+  .ov-skip{background:#2a0808;color:#f87171;border:1px solid #ef444455;}
+  .ov-tooltip{display:none;margin-top:5px;padding:7px 10px;
+    background:#131c30;border:1px solid #2a3a58;border-radius:6px;
+    font-size:10px;color:#a0b4d0;line-height:1.6;}
+  .ov-tooltip.open{display:block;}
+
+  /* ── RATING BADGES ── */
+  .badge{width:38px;height:26px;border-radius:5px;display:flex;align-items:center;
+    justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;align-self:start;margin-top:1px;}
+  .r9{background:#4a0070;color:#e879f9;border:1px solid #c026d3;}
+  .r8{background:#0f2060;color:#93c5fd;border:1px solid #2563eb;}
+  .r7{background:#072830;color:#67e8f9;border:1px solid #0891b2;}
+  .rna{background:#141414;color:#444;border:1px solid #222;font-size:9px;}
+  .rgpt{background:#181818;color:#555;border:1px solid #333;font-size:9px;}
+
+  /* ── FILTER BAR ── */
+  .filter-bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+  .fbtn{padding:7px 14px;border-radius:999px;border:1px solid var(--border);
+    background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-weight:700;
+    font-family:inherit;-webkit-appearance:none;appearance:none;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    user-select:none;min-height:36px;transition:all 0.15s;}
+  .fbtn:active{transform:scale(0.96);}
+  .fbtn.active{background:#1a0a30;color:#c4b5fd;border-color:var(--aurum);}
+  .fbtn.f9.active{background:#2a0040;color:#e879f9;border-color:#c026d3;}
+  .fbtn.f8.active{background:#0a1840;color:#93c5fd;border-color:#2563eb;}
+  .fbtn.f7.active{background:#051828;color:#67e8f9;border-color:#0891b2;}
+
+
+  /* ── YT NAME LINK ── */
+  .yt-name-link{
+    display:inline-block;margin-right:5px;font-size:11px;
+    text-decoration:none;vertical-align:middle;line-height:1;
+    transition:opacity 0.15s;
+  }
+  .yt-name-link:hover{opacity:0.7;}
+
+  /* ── FESTIVAL TAG ── */
+  .fest-tag {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 9.5px;
+    font-weight: 700;
+    background: #0a1a1a;
+    color: #22d3ee;
+    border: 1px solid #0891b244;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── SEARCH ── */
+  .search-wrap{padding:0 0 14px; position:relative;}
+  .search-input{
+    width:100%;padding:10px 36px 10px 14px;border-radius:8px;
+    border:1px solid var(--border);background:var(--surface);
+    color:var(--text);font-size:13px;font-family:inherit;
+    -webkit-appearance:none;outline:none;
+  }
+  .search-input:focus{border-color:#3b82f6;}
+  .search-input::placeholder{color:var(--muted);}
+  .search-clear{
+    position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    background:none;border:none;color:var(--muted);font-size:16px;
+    cursor:pointer;padding:4px;display:none;touch-action:manipulation;
+  }
+  .search-clear.visible{display:block;}
+
+  /* ── DAY FILTER ── */
+  .day-bar{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+  .dbtn{
+    padding:6px 12px;border-radius:999px;border:1px solid var(--border);
+    background:var(--surface);color:var(--muted);cursor:pointer;
+    font-size:11px;font-weight:700;font-family:inherit;-webkit-appearance:none;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    min-height:36px;transition:all 0.15s;
+  }
+  .dbtn.active{background:#071828;color:#93c5fd;border-color:#3b82f6;}
+
+  /* ── NOW PLAYING ── */
+  .act-row.now-playing{background:#0a1a0a !important;}
+  .act-row.now-playing::after{
+    content:'▶ JETZT';position:absolute;top:6px;right:8px;
+    font-size:9px;font-weight:700;color:#4ade80;
+    background:#0f2a10;border:1px solid #10b98155;
+    border-radius:4px;padding:1px 5px;
+  }
+  .act-row.coming-next::after{
+    content:'NÄCHSTER';position:absolute;top:6px;right:8px;
+    font-size:9px;font-weight:700;color:#fcd34d;
+    background:#1a1200;border:1px solid #f59e0b55;
+    border-radius:4px;padding:1px 5px;
+  }
+
+  /* ── COMPACT MODE ── */
+  .compact .act-comment{display:none;}
+  .compact .fest-tag{display:none;}
+  .compact .own-rating-wrap{display:none;}
+  .compact .own-rating-panel{display:none;}
+  .compact .act-row{padding:5px 14px 5px 18px;}
+
+  /* ── MY PLAN BUTTON ── */
+  .plan-btn{
+    display:inline-flex;align-items:center;gap:4px;
+    margin-top:5px;padding:2px 8px;border-radius:5px;
+    font-size:10px;font-weight:700;cursor:pointer;
+    border:1px solid #2a3a58;background:#0c1220;color:#4a6a8a;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    transition:all 0.15s;min-height:24px;font-family:inherit;-webkit-appearance:none;
+  }
+  .plan-btn.added{border-color:#10b981;background:#051a10;color:#6ee7b7;}
+
+  /* ── TOOLBAR ── */
+  .toolbar{
+    display:flex;gap:8px;justify-content:center;align-items:center;
+    flex-wrap:wrap;margin-bottom:14px;
+  }
+  .tool-btn{
+    padding:6px 12px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface);color:var(--muted);cursor:pointer;
+    font-size:11px;font-weight:600;font-family:inherit;-webkit-appearance:none;
+    touch-action:manipulation;min-height:36px;transition:all 0.15s;
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  .tool-btn:active{transform:scale(0.96);}
+  .tool-btn.active{background:#071828;color:#93c5fd;border-color:#3b82f6;}
+
+  /* ── SEARCH HIGHLIGHT ── */
+  .act-row.search-hidden{display:none;}
+  mark{background:#1a2a10;color:#4ade80;border-radius:2px;padding:0 1px;}
+  /* ── OWN RATING ── */
+  .own-rating-wrap{margin-top:5px;}
+  .own-rating-btn{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;
+    border:1px solid #2a3a58;background:#0c1220;color:#4a6a8a;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    transition:all 0.15s;min-height:26px;font-family:inherit;-webkit-appearance:none;
+  }
+  .own-rating-btn:active{transform:scale(0.95);}
+  .own-rating-btn.has-own{border-color:#a855f7;background:#150920;color:#c4b5fd;}
+  .own-rating-panel{
+    display:none;margin-top:6px;padding:10px 12px;
+    background:#080c18;border:1px solid #1e2a40;border-radius:8px;
+  }
+  .own-rating-panel.open{display:block;}
+  .own-rating-label{font-size:10px;color:#4a6a8a;margin-bottom:7px;display:block;}
+  .star-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;}
+  .star-btn{
+    width:28px;height:28px;border-radius:5px;border:1px solid #1e2a40;
+    background:#0a0e1a;color:#3a4a60;font-size:11px;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+    transition:background 0.1s,color 0.1s,border-color 0.1s;
+    font-family:inherit;-webkit-appearance:none;flex-shrink:0;
+  }
+  .star-btn:active{transform:scale(0.88);}
+  .star-btn.cur9{background:#4a0070;color:#e879f9;border-color:#c026d3;}
+  .star-btn.cur8{background:#0f2060;color:#93c5fd;border-color:#2563eb;}
+  .star-btn.cur7{background:#072830;color:#67e8f9;border-color:#0891b2;}
+  .star-btn.cur-low{background:#1e0808;color:#f87171;border-color:#7f1d1d;}
+  .own-clear-btn{
+    font-size:10px;color:#5a3a3a;border:none;background:none;
+    cursor:pointer;text-decoration:underline;font-family:inherit;
+    touch-action:manipulation;padding:0;display:block;margin-top:2px;
+  }
+  /* own badge: always ID = own-badge-{id}, so JS can find+replace safely */
+  .own-badge{
+    width:38px;height:26px;border-radius:5px;display:inline-flex;
+    align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;margin-top:1px;margin-left:4px;
+    vertical-align:top;
+  }
+  .own-badge.or9{background:#4a0070;color:#e879f9;border:1px solid #c026d3;}
+  .own-badge.or8{background:#0f2060;color:#93c5fd;border:1px solid #2563eb;}
+  .own-badge.or7{background:#072830;color:#67e8f9;border:1px solid #0891b2;}
+  .own-badge.or-low{background:#1e0808;color:#f87171;border:1px solid #7f1d1d;}
+  /* bar overrides */
+  .act-row.own-rank9::before{background:#c026d3 !important;}
+  .act-row.own-rank8::before{background:#2563eb !important;}
+  .act-row.own-rank7::before{background:#0891b2 !important;}
+  .act-row.own-rank-low::before{background:#7f1d1d !important;}
+
+  /* ── ROUTING ── */
+  .routing-box{max-width:700px;margin:0 auto;}
+  .routing-day{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+  .routing-day-hdr{padding:8px 14px;background:#0a0f1e;font-size:12px;font-weight:700;color:#fcd34d;border-bottom:1px solid #2a2000;}
+  .routing-entry{display:grid;grid-template-columns:58px 28px 1fr 38px;align-items:start;
+    padding:7px 14px;border-bottom:1px solid #0f1728;gap:8px;}
+  .routing-entry:last-child{border-bottom:none;}
+  .routing-entry:hover{background:#121a2e;}
+  .rstage{font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding-top:2px;}
+  .rstage.aurum{color:var(--aurum);}
+  .rstage.curame{color:var(--curame);}
+  .rstage.prism{color:var(--prism);}
+  .routing-entry.end-row{background:#08100a;border-top:1px solid #10b98133;}
+  .routing-entry.end-row .time{color:#10b981;font-weight:700;}
+  .routing-entry.end-row .act-name{color:#6ee7b7;font-size:11px;font-weight:600;}
+  .routing-entry.end-row .act-comment{color:#3a6a50;}
+  .conflict-box{background:#1a1200;border:1px solid #f59e0b44;border-radius:8px;padding:12px 14px;
+    margin-bottom:14px;font-size:11px;color:#fcd34d;line-height:1.7;}
+  .conflict-box strong{font-size:12px;display:block;margin-bottom:4px;color:#fbbf24;}
+</style>
+<script>
+  // Register Service Worker for offline support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js').then(function(reg) {
+        console.log('SW registered:', reg.scope);
+      }).catch(function(err) {
+        console.log('SW registration failed:', err);
+      });
+    });
+    // iOS standalone padding
+    if (window.navigator.standalone) {
+      document.documentElement.style.paddingTop = '44px';
+    }
+  }
+</script>
+</head>
+<body>
+
+<header>
+  <h1>Burning Mountain 2026</h1>
+  <p>Vollständiger Zeitplan · Johannes' Ratings · 25.–28. Juni 2026</p>
+</header>
+
+
+<div class="nav-ext" style="text-align:center;margin-bottom:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+  <a href="crossover.html" style="display:inline-flex;align-items:center;gap:6px;
+    padding:7px 14px;border-radius:999px;border:1px solid #f59e0b44;
+    background:#1a1200;color:#fcd34d;text-decoration:none;
+    font-size:12px;font-weight:700;touch-action:manipulation;">
+    🎪 Crossover
+  </a>
+  <a href="meinplan.html" style="display:inline-flex;align-items:center;gap:6px;
+    padding:7px 14px;border-radius:999px;border:1px solid #10b98144;
+    background:#051a10;color:#6ee7b7;text-decoration:none;
+    font-size:12px;font-weight:700;touch-action:manipulation;">
+    📋 Mein Plan
+  </a>
+</div>
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:#c026d3;"></div>Rating 9 – EPIC</div>
+  <div class="legend-item"><div class="dot" style="background:#2563eb;"></div>Rating 8+ – WOW</div>
+  <div class="legend-item"><div class="dot" style="background:#0891b2;"></div>Rating 7+</div>
+  <div class="legend-item"><div class="dot" style="background:#252535;"></div>GPT-Rating*</div>
+  <div class="legend-item"><div class="dot" style="background:#1e2a40;"></div>kein Rating</div>
+  <div class="legend-item"><div class="dot" style="background:#0f2a10;border:1px solid #10b98155;"></div>hier bleiben</div>
+  <div class="legend-item"><div class="dot" style="background:#2a0808;border:1px solid #ef444455;"></div>dort besser</div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <input type="text" class="search-input" id="search-input" placeholder="🔍  Act suchen..." autocomplete="off" autocorrect="off" spellcheck="false">
+  <button type="button" class="search-clear" id="search-clear">✕</button>
+</div>
+
+<!-- DAY FILTER -->
+<div class="day-bar">
+  <button type="button" class="dbtn active" data-day="all">Alle Tage</button>
+  <button type="button" class="dbtn" data-day="thu">Do 25.6.</button>
+  <button type="button" class="dbtn" data-day="fri">Fr 26.6.</button>
+  <button type="button" class="dbtn" data-day="sat">Sa 27.6.</button>
+  <button type="button" class="dbtn" data-day="sun">So 28.6.</button>
+</div>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <button type="button" class="tool-btn" id="btn-compact">⚡ Kompakt</button>
+  <button type="button" class="tool-btn" id="btn-now">🟢 Jetzt live</button>
+  <button type="button" class="tool-btn" id="btn-refresh">↻ Aktualisieren</button>
+  <a href="meinplan.html" class="tool-btn" style="text-decoration:none;">📋 Mein Plan</a>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <button type="button" class="fbtn active" data-filter="all">Alle Acts</button>
+  <button type="button" class="fbtn f7" data-filter="7">7+ eigenes Rating</button>
+  <button type="button" class="fbtn f8" data-filter="8">8+ eigenes Rating</button>
+  <button type="button" class="fbtn f9" data-filter="9">9 – EPIC</button>
+</div>
+
+<div class="tabs">
+  <button type="button" class="tab active" data-tab="all">Alle</button>
+  <button type="button" class="tab ta" data-tab="aurum">🟣 Aurum</button>
+  <button type="button" class="tab tc" data-tab="curame">🟢 Curame</button>
+  <button type="button" class="tab tp" data-tab="prism">🔵 Prism</button>
+  <button type="button" class="tab tr" data-tab="routing">⚡ Routing</button>
+</div>
+
+<!-- ══════════════════════════ AURUM ══════════════════════════ -->
+<div class="stage-block" id="block-aurum">
+  <div class="stage-hdr aurum">🟣 Aurum Stage – Psytrance</div>
+
+  <div class="day-hdr" data-day="fri">Freitag, 26. Juni</div>
+  <div class="act-row rank7" data-day="fri">
+    <div class="time">13:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=dobgAZhmTmM" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Original">▶ </a>Yekumi</div><div class="act-comment">Live, Flöte, Psybient-Mix</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="yekumi">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-yekumi"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="yekumi">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="yekumi" data-plan-name="Yekumi">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.3</div>
+  </div>
+  <div class="act-row rank7" data-day="fri">
+    <div class="time">14:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=DQXK3_DWubY" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Boom 2023">▶ </a>Liquid Soul</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="liquid-soul">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-liquid-soul"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="liquid-soul">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="liquid-soul" data-plan-name="Liquid Soul">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.5</div>
+  </div>
+  <div class="act-row rank8" data-day="fri">
+    <div class="time">15:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=brJOhEq8oWc" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Indian Spirit 2024">▶ </a>Sighter</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="sighter">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-sighter"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="sighter">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="sighter" data-plan-name="Sighter">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.9</div>
+  </div>
+  <div class="act-row rank8" data-day="fri">
+    <div class="time">17:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=dYn6ukaqTHw" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Ranji</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="ranji">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-ranji"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="ranji">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="ranji" data-plan-name="Ranji">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.3</div>
+  </div>
+  <div class="act-row rank9" data-day="fri">
+    <div class="time">18:30</div>
+    <div class="act-main">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=X4QgFQdSaDI&list=RDX4QgFQdSaDI&start_radio=1" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Rexalted ❤</div>
+      <div class="act-comment">"looking forward to seeing him live"</div>
+      <span class="overlap-badge ov-go" data-tip="tip-r1">✓ Hier bleiben</span>
+      <div class="ov-tooltip" id="tip-r1">Curame 18:00–20:00 läuft parallel, aber kein bewerteter Act dagegen. Rexalted (9.0) hat Priorität.</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="rexalted">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-rexalted"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="rexalted">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="rexalted" data-plan-name="Rexalted">☆ Zu meinem Plan</button>
+    <div class="badge r9">9.0</div>
+  </div>
+  <div class="act-row rank9" data-day="fri">
+    <div class="time">19:30</div>
+    <div class="act-main">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=6yswV6BpipE" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · BM 2025">▶ </a>Omiki</div>
+      <div class="act-comment">Ozora &amp; Burning Mountain</div>
+      <span class="overlap-badge ov-go" data-tip="tip-r2">✓ Hier bleiben</span>
+      <div class="ov-tooltip" id="tip-r2">Vibrasutra läuft Do/Fr Curame – dort kein Gegner in diesem Slot. Omiki (9.0) vs. Findelkind Prism (8.4*). Aurum klar vorzuziehen.</div>
+      <div class="fest-tag">@ Ozora</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="omiki">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-omiki"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="omiki">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="omiki" data-plan-name="Omiki">☆ Zu meinem Plan</button>
+    <div class="badge r9">9.0</div>
+  </div>
+  <div class="act-row rank9" data-day="fri">
+    <div class="time">21:00</div>
+    <div class="act-main">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=yWDYhfWPu-U" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Original">▶ </a>Blastoyz 🏆</div>
+      <div class="act-comment">"Richtig gut zum drauf abgehen!!!"</div>
+      <span class="overlap-badge ov-go" data-tip="tip-r3">✓ Hier bleiben</span>
+      <div class="ov-tooltip" id="tip-r3">Jimi Green (Prism, 8.2*) läuft parallel. Blastoyz (9.3) ist Johannes' höchstes eigenes Rating – kein Wechsel.</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="blastoyz">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-blastoyz"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="blastoyz">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="blastoyz" data-plan-name="Blastoyz">☆ Zu meinem Plan</button>
+    <div class="badge r9">9.3</div>
+  </div>
+  <div class="act-row rank8" data-day="fri">
+    <div class="time">22:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=UsL1F4BlKUU" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Winter Mix 2023">▶ </a>Faders</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="faders">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-faders"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="faders">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="faders" data-plan-name="Faders">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.2</div>
+  </div>
+
+  <div class="day-hdr" data-day="sat">Samstag, 27. Juni</div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">00:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=RX-JnIAEBVo&t=108s" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Bliss</div><div class="act-comment">Live-Gitarre, psychedelic rock</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="bliss">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-bliss"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="bliss">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="bliss" data-plan-name="Bliss">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.1</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">01:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=OPQt1aPpmpw&t=1951s" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Avalon</div><div class="act-comment">Sometimes amazing, sometimes relentless</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="avalon">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-avalon"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="avalon">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="avalon" data-plan-name="Avalon">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.5</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">03:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=nNCEuYOiPBo" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Arjuna</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="arjuna">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-arjuna"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="arjuna">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="arjuna" data-plan-name="Arjuna">☆ Zu meinem Plan</button>
+    <div class="badge rna">4</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">04:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=f41uug0MwjM" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Giuseppe</div><div class="act-comment">Too dark/fast/spooky</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="giuseppe">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-giuseppe"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="giuseppe">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="giuseppe" data-plan-name="Giuseppe">☆ Zu meinem Plan</button>
+    <div class="badge rna">3.5</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">06:00</div>
+    <div class="act-main"><div class="act-name">BREAK</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">10:30</div>
+    <div class="act-main"><div class="act-name">Silent Sphere</div><div class="act-comment">Very progressive</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="silent-sphere">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-silent-sphere"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="silent-sphere">✕ Löschen</button></div></div>
+    <div class="badge r7">7.8</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">12:00</div>
+    <div class="act-main"><div class="act-name">Murphy Haze</div><div class="act-comment">kein eigenes Rating</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="murphy-haze">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-murphy-haze"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="murphy-haze">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="murphy-haze" data-plan-name="Silent Sphere">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.1*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">13:30</div>
+    <div class="act-main">
+      <div class="act-name">7Eleven vs. Ebrax</div>
+      <div class="act-comment">kein eigenes Rating</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="7eleven-vs-ebrax">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-7eleven-vs-ebrax"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="7eleven-vs-ebrax">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="7eleven-vs-ebrax" data-plan-name="7Eleven vs. Ebrax">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.4*</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">15:00</div>
+    <div class="act-main"><div class="act-name">Audiomatic</div><div class="act-comment">Too much old school trance</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="audiomatic">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-audiomatic"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="audiomatic">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="audiomatic" data-plan-name="Audiomatic">☆ Zu meinem Plan</button>
+    <div class="badge r7">5.5–6.3</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">16:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=SdsKKXy57hw" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Universo Paralello">▶ </a>Phaxe</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="phaxe">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-phaxe"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="phaxe">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="phaxe" data-plan-name="Phaxe">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.7</div>
+  </div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">18:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=mvVQNMrxUaI&t=1696s" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Asgard</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="asgard">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-asgard"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="asgard">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="asgard" data-plan-name="Asgard">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.0</div>
+  </div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">19:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=Y5oEIsWHKuA" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Boom 2025">▶ </a>Merkaba</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="merkaba">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-merkaba"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="merkaba">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="merkaba" data-plan-name="Merkaba">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.0</div>
+  </div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">21:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=1-ccS5614j0" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Ozora 2023">▶ </a>Astrix</div>
+      <div class="fest-tag">@ Indian Spirit,Ozora</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="astrix">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-astrix"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="astrix">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="astrix" data-plan-name="Astrix">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.3</div>
+  </div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">22:30</div>
+    <div class="act-main">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=N3BOPvOvDmE" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Original">▶ </a>Sajanka</div>
+      <div class="act-comment">Indische Vibes, sehr aktivierend</div>
+      <div class="fest-tag">@ Ozora</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="sajanka">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-sajanka"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="sajanka">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="sajanka" data-plan-name="Sajanka">☆ Zu meinem Plan</button>
+    <div class="badge r8">6–8.5</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">23:30</div>
+    <div class="act-main"><div class="act-name">FIRE SHOW</div></div>
+    <div class="badge rna">–</div>
+  </div>
+
+  <div class="day-hdr" data-day="sun">Sonntag, 28. Juni</div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">00:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=s6WEKTk026M" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Tripadvisor</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="tripadvisor">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-tripadvisor"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="tripadvisor">✕ Löschen</button></div></div>
+    <div class="badge r7">4.5</div>
+  </div>
+  <div class="act-row rank8" data-day="sun">
+    <div class="time">01:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=UAiSux2PZHs" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Antinomy</div><div class="act-comment">"Amazing for a trip!!!"</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="antinomy">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-antinomy"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="antinomy">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="antinomy" data-plan-name="Antinomy">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.2</div>
+  </div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">03:00</div>
+    <div class="act-main"><div class="act-name">Starlab</div>
+      <div class="fest-tag">@ Ozora</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="starlab">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-starlab"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="starlab">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="starlab" data-plan-name="Starlab">☆ Zu meinem Plan</button>
+    <div class="badge r7">6.8</div>
+  </div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">04:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=msLPFTbyP30" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Henrique Camacho</div><div class="act-comment">With lots of hardstyle parts</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="henrique-camacho">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-henrique-camacho"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="henrique-camacho">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="henrique-camacho" data-plan-name="Henrique Camacho">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.6</div>
+  </div>
+  <div class="act-row rankna" data-day="sun">
+    <div class="time">06:00</div>
+    <div class="act-main"><div class="act-name">BREAK</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">09:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=X5elsxNTdt8" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Roll-In Groove Set">▶ </a>Schameleon</div><div class="act-comment">Fast, groovy, zieht einen rein</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="schameleon">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-schameleon"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="schameleon">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="schameleon" data-plan-name="Schameleon">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.5</div>
+  </div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">12:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=rTRvCORTIZA" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · DJ Set">▶ </a>Hatikwa</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="hatikwa">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-hatikwa"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="hatikwa">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="hatikwa" data-plan-name="Hatikwa">☆ Zu meinem Plan</button>
+    <div class="badge r7">7.5</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">13:00</div>
+    <div class="act-main"><div class="act-name">Bassforscher</div><div class="act-comment">kein eigenes Rating</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="bassforscher">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-bassforscher"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="bassforscher">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="bassforscher" data-plan-name="Bassforscher">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.8*</div>
+  </div>
+  <div class="act-row rank8" data-day="sun">
+    <div class="time">14:00</div>
+    <div class="act-main">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=P1F8BSj_m5g&list=RDP1F8BSj_m5g&start_radio=1" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Aura Vortex</div>
+      <div class="act-comment">Freund von Bill – Ozora</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="aura-vortex">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-aura-vortex"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="aura-vortex">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="aura-vortex" data-plan-name="Aura Vortex">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.3</div>
+  </div>
+  <div class="act-row rank9" data-day="sun">
+    <div class="time">15:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=b_m9pJBQuiE" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Boom 2025">▶ </a>Emok ★</div><div class="act-comment">EPIC – Indian Spirit Veteran</div>
+      <div class="fest-tag">@ Indian Spirit</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="emok">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-emok"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="emok">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="emok" data-plan-name="Emok ★">☆ Zu meinem Plan</button>
+    <div class="badge r9">9.0</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ CURAME ══════════════════════════ -->
+<div class="stage-block" id="block-curame">
+  <div class="stage-hdr curame">🟢 Curame Stage – Dome / Garden</div>
+
+  <div class="day-hdr" data-day="thu">Donnerstag, 25. Juni</div>
+  <div class="act-row rankna" data-day="thu">
+    <div class="time">17:00</div>
+    <div class="act-main"><div class="act-name">Drum Circle</div><div class="act-comment">by Connecting Beats</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rank8" data-day="thu">
+    <div class="time">18:00</div>
+    <div class="act-main"><div class="act-name">Playroots</div></div>
+    <div class="badge r8">6.5–8.4</div>
+  </div>
+  <div class="act-row rank7" data-day="thu">
+    <div class="time">19:30</div>
+    <div class="act-main"><div class="act-name">Aphrodite &amp; Felipão</div><div class="act-comment">Drum &amp; Bass / Groovy</div></div>
+    <div class="badge r7">5–6.8</div>
+  </div>
+  <div class="act-row rank7" data-day="thu">
+    <div class="time">21:00</div>
+    <div class="act-main"><div class="act-name">Angelica Fravi</div><div class="act-comment">Progressive EDM, South American vibes</div></div>
+    <div class="badge r7">4.1–7.8</div>
+  </div>
+  <div class="act-row rank7" data-day="thu">
+    <div class="time">23:00</div>
+    <div class="act-main"><div class="act-name">Vibrasutra</div><div class="act-comment">Soundjourney – zum Hinlegen</div></div>
+    <div class="badge r7">7.6</div>
+  </div>
+
+  <div class="day-hdr" data-day="fri">Freitag, 26. Juni</div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">02:00</div>
+    <div class="act-main"><div class="act-name">Fractal Gong Wisper</div><div class="act-comment">Concert</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">04:00</div>
+    <div class="act-main"><div class="act-name">CHILLOUT</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">08:30</div>
+    <div class="act-main"><div class="act-name">Yoga</div><div class="act-comment">with Claudia Saviera</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">11:00</div>
+    <div class="act-main"><div class="act-name">The Power of the Liberated Voice</div><div class="act-comment">by Sabina Elsa Astolfi &amp; Voice Alchemy</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">13:00</div>
+    <div class="act-main"><div class="act-name">Mainfloor Opening</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">14:30</div>
+    <div class="act-main"><div class="act-name">Drum Circle</div><div class="act-comment">by Connecting Beats</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">15:30</div>
+    <div class="act-main"><div class="act-name">Drum Circle</div><div class="act-comment">by Drum &amp; Dance Zürich</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">17:30</div>
+    <div class="act-main"><div class="act-name">Somos</div><div class="act-comment">Concert – Identity unsicher</div></div>
+    <div class="badge rna">3.5–6</div>
+  </div>
+  <div class="act-row rank8" data-day="fri">
+    <div class="time">20:00</div>
+    <div class="act-main"><div class="act-name">Yeahman</div><div class="act-comment">DJ Set – viele bekannte Downtempo-Songs</div></div>
+    <div class="badge r8">8.0</div>
+  </div>
+  <div class="act-row rank8" data-day="fri">
+    <div class="time">22:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=JQkvi-dZ6vg" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Original">▶ </a>Cuervo Cuervo</div><div class="act-comment">Concert – Gitarre, Latin Groove + EDM</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="cuervo-cuervo">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-cuervo-cuervo"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="cuervo-cuervo">✕ Löschen</button></div></div>
+    <div class="badge r8">8.5</div>
+  </div>
+
+  <div class="day-hdr" data-day="sat">Samstag, 27. Juni</div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">00:30</div>
+    <div class="act-main"><div class="act-name">Dandara &amp; Anissa Damali</div><div class="act-comment">Live Set – Psychill/Latin stark; Musical-Parts weniger</div></div>
+    <div class="badge r8">4–8.3</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">02:00</div>
+    <div class="act-main"><div class="act-name">CHILLOUT</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">09:30</div>
+    <div class="act-main"><div class="act-name">Kundalini Yoga</div><div class="act-comment">by Ayesha</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">11:00</div>
+    <div class="act-main"><div class="act-name">Elysium Breathwork</div><div class="act-comment">From Overload to Clarity – by Miro Komarek</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">13:30</div>
+    <div class="act-main">
+      <div class="act-name">Itotia</div>
+      <div class="act-comment">Cacao Dance</div>
+    </div>
+    <div class="badge rgpt">8.5*</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">17:20</div>
+    <div class="act-main"><div class="act-name">Aztec Dance</div><div class="act-comment">by Emanuel</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">17:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=kVlpigLGcmA" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>"Tribalism" Black Bombo</div><div class="act-comment">Concert – Tribal, Didgeridoo-Parts stark</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="tribalism-black-bombo">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-tribalism-black-bombo"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="tribalism-black-bombo">✕ Löschen</button></div></div>
+    <div class="badge r7">4.8–8</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">19:30</div>
+    <div class="act-main"><div class="act-name">Aphrodite &amp; Felipão</div><div class="act-comment">DJ Set</div></div>
+    <div class="badge r7">5–6.8</div>
+  </div>
+  <div class="act-row rank8" data-day="sat">
+    <div class="time">21:30</div>
+    <div class="act-main">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=KTDJVwB_A3Y" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Ozora Dome 2025">▶ </a>Kalya Scintilla</div>
+      <div class="act-comment">DJ Set – Ozora-Künstlerin</div>
+      <span class="overlap-badge ov-maybe" data-tip="tip-c2">≈ Astrix läuft noch</span>
+      <div class="ov-tooltip" id="tip-c2">Astrix (Aurum, 8.3) läuft ab 21:00 noch bis ~22:30. Kalya Scintilla (8.2) startet 21:30. Wer Astrix schon kennt → Curame, sonst Aurum weiter.</div>
+      <div class="fest-tag">@ Ozora</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="kalya-scintilla">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-kalya-scintilla"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="kalya-scintilla">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="kalya-scintilla" data-plan-name="Kalya Scintilla">☆ Zu meinem Plan</button>
+    <div class="badge r8">8.2</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">23:30</div>
+    <div class="act-main"><div class="act-name">FIRESHOW MAINFLOOR</div></div>
+    <div class="badge rna">–</div>
+  </div>
+
+  <div class="day-hdr" data-day="sun">Sonntag, 28. Juni</div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">01:00</div>
+    <div class="act-main"><div class="act-name">Hans vom Schneggeloch</div><div class="act-comment">DJ Set (CH) – EDM mit Psychill-Parts, einzigartig</div></div>
+    <div class="badge r7">6.5–8.5</div>
+  </div>
+  <div class="act-row rankna" data-day="sun">
+    <div class="time">03:00</div>
+    <div class="act-main"><div class="act-name">CHILLOUT</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="sun">
+    <div class="time">09:00</div>
+    <div class="act-main"><div class="act-name">Yoga</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankna" data-day="sun">
+    <div class="time">10:30</div>
+    <div class="act-main"><div class="act-name">Kernwärz</div><div class="act-comment">Conscious Breathwork Centering &amp; Mirror Breathing</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rank7" data-day="sun">
+    <div class="time">13:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=PBd7MoMmb-U" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Ima Nazca</div><div class="act-comment">Concert</div></div>
+    <div class="badge r7">5.5</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">15:00</div>
+    <div class="act-main"><div class="act-name">Magnetic Tapes: Maxime</div><div class="act-comment">DJ Set</div></div>
+    <div class="badge rgpt">7.9*</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ PRISM ══════════════════════════ -->
+<div class="stage-block" id="block-prism">
+  <div class="stage-hdr prism">🔵 Prism Stage – Alchemy Circle · alle ohne * = kein eigenes Rating</div>
+
+  <div class="day-hdr" data-day="thu">Donnerstag, 25. Juni</div>
+  <div class="act-row rankgpt" data-day="thu">
+    <div class="time">18:00</div>
+    <div class="act-main"><div class="act-name">Effim</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="effim">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-effim"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="effim">✕ Löschen</button></div></div>
+    <div class="badge rgpt">8.1*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="thu">
+    <div class="time">19:30</div>
+    <div class="act-main"><div class="act-name">Astronix</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="astronix">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-astronix"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="astronix">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="astronix" data-plan-name="Effim">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.8*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="thu">
+    <div class="time">21:00</div>
+    <div class="act-main"><div class="act-name">Child_OS</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="child-os">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-child-os"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="child-os">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="child-os" data-plan-name="Astronix">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.0*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="thu">
+    <div class="time">22:30</div>
+    <div class="act-main"><div class="act-name">Akayun</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="akayun">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-akayun"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="akayun">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="akayun" data-plan-name="Child_OS">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.8*</div>
+  </div>
+
+  <div class="day-hdr" data-day="fri">Freitag, 26. Juni</div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">00:00</div>
+    <div class="act-main"><div class="act-name">Gigi</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="gigi">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-gigi"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="gigi">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="gigi" data-plan-name="Akayun">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.7*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">01:30</div>
+    <div class="act-main"><div class="act-name">Power Strangers</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="power-strangers">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-power-strangers"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="power-strangers">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="power-strangers" data-plan-name="Gigi">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.6*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">03:00</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=s6WEKTk026M" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube">▶ </a>Tripadvisor</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="tripadvisor">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-tripadvisor"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="tripadvisor">✕ Löschen</button></div></div>
+    <div class="badge rgpt">7.8*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">04:30</div>
+    <div class="act-main"><div class="act-name">Space Jungle</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="space-jungle">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-space-jungle"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="space-jungle">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="space-jungle" data-plan-name="Tripadvisor">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.5*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">06:00</div>
+    <div class="act-main"><div class="act-name">Prodelic</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="prodelic">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-prodelic"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="prodelic">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="prodelic" data-plan-name="Space Jungle">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.1*</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">07:30</div>
+    <div class="act-main"><div class="act-name">BREAK</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">11:30</div>
+    <div class="act-main"><div class="act-name">Bone</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="bone">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-bone"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="bone">✕ Löschen</button></div></div>
+    <div class="badge rgpt">8.1*</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">13:00</div>
+    <div class="act-main"><div class="act-name">Mainfloor Opening</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">13:30</div>
+    <div class="act-main"><div class="act-name">D-Liscious</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="d-liscious">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-d-liscious"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="d-liscious">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="d-liscious" data-plan-name="Bone">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.9*</div>
+  </div>
+  <div class="act-row rankna" data-day="fri">
+    <div class="time">15:00</div>
+    <div class="act-main"><div class="act-name">Magenta</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="magenta">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-magenta"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="magenta">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="magenta" data-plan-name="D-Liscious">☆ Zu meinem Plan</button>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">16:30</div>
+    <div class="act-main"><div class="act-name">Molunar</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="molunar">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-molunar"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="molunar">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="molunar" data-plan-name="Magenta">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.0*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">18:00</div>
+    <div class="act-main"><div class="act-name">Geometrico</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="geometrico">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-geometrico"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="geometrico">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="geometrico" data-plan-name="Molunar">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.5*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">19:30</div>
+    <div class="act-main">
+      <div class="act-name">Findelkind</div>
+      <span class="overlap-badge ov-skip" data-tip="tip-p1">→ Aurum besser</span>
+      <div class="ov-tooltip" id="tip-p1">Omiki (Aurum, 9.0 eigenes Rating) läuft parallel. Findelkind nur ChatGPT-Rating 8.4*. Aurum klar bevorzugen.</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="findelkind">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-findelkind"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="findelkind">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="findelkind" data-plan-name="Findelkind">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.4*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">21:00</div>
+    <div class="act-main">
+      <div class="act-name">Jimi Green</div>
+      <span class="overlap-badge ov-skip" data-tip="tip-p2">→ Aurum besser</span>
+      <div class="ov-tooltip" id="tip-p2">Blastoyz (Aurum, 9.3 eigenes Rating) läuft parallel. Jimi Green nur ChatGPT 8.2*. Aurum klar bevorzugen.</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="jimi-green">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-jimi-green"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="jimi-green">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="jimi-green" data-plan-name="Jimi Green">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.2*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="fri">
+    <div class="time">22:30</div>
+    <div class="act-main"><div class="act-name">Rugrats</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="rugrats">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-rugrats"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="rugrats">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="rugrats" data-plan-name="Rugrats">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.4*</div>
+  </div>
+
+  <div class="day-hdr" data-day="sat">Samstag, 27. Juni</div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">00:00</div>
+    <div class="act-main"><div class="act-name">Jumpstreet</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="jumpstreet">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-jumpstreet"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="jumpstreet">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="jumpstreet" data-plan-name="Rugrats">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">5.5*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">01:30</div>
+    <div class="act-main"><div class="act-name">Render</div></div>
+    <div class="badge rgpt">8.0*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">03:00</div>
+    <div class="act-main"><div class="act-name">Braingineers</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="braingineers">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-braingineers"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="braingineers">✕ Löschen</button></div></div>
+    <div class="badge rgpt">7.3*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">04:30</div>
+    <div class="act-main"><div class="act-name">Armienz</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="armienz">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-armienz"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="armienz">✕ Löschen</button></div></div>
+    <div class="badge rgpt">7.6*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">06:00</div>
+    <div class="act-main"><div class="act-name">Makolly</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="makolly">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-makolly"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="makolly">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="makolly" data-plan-name="Armienz">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.9*</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">07:30</div>
+    <div class="act-main"><div class="act-name">BREAK</div></div>
+    <div class="badge rna">–</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">11:30</div>
+    <div class="act-main"><div class="act-name">Ambient Pino</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="ambient-pino">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-ambient-pino"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="ambient-pino">✕ Löschen</button></div></div>
+    <div class="badge rgpt">7.2*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">13:00</div>
+    <div class="act-main">
+      <div class="act-name">Mad Fusion</div>
+      <div class="act-comment">Honoring the memory of Dashailen NE</div>
+    
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="mad-fusion">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-mad-fusion"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="mad-fusion">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="mad-fusion" data-plan-name="Ambient Pino">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.2*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">16:00</div>
+    <div class="act-main"><div class="act-name">Kryon</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="kryon">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-kryon"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="kryon">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="kryon" data-plan-name="Mad Fusion">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.3*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">17:30</div>
+    <div class="act-main"><div class="act-name">Cheeky Jojo</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="cheeky-jojo">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-cheeky-jojo"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="cheeky-jojo">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="cheeky-jojo" data-plan-name="Kryon">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.7*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">19:00</div>
+    <div class="act-main"><div class="act-name">Authentic</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="authentic">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-authentic"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="authentic">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="authentic" data-plan-name="Cheeky Jojo">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.9*</div>
+  </div>
+  <div class="act-row rank7" data-day="sat">
+    <div class="time">20:30</div>
+    <div class="act-main"><div class="act-name"><a href="https://www.youtube.com/watch?v=vE9j0KpFElA" target="_blank" rel="noopener" class="yt-name-link" style="color:#ff4444;" title="YouTube · Original">▶ </a>Duke &amp; Gonzo</div><div class="act-comment">GOA/Psytrance, funky – eigenes Rating</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="duke-amp-gonzo">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-duke-amp-gonzo"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="duke-amp-gonzo">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="duke-amp-gonzo" data-plan-name="Duke &amp; Gonzo">☆ Zu meinem Plan</button>
+    <div class="badge r7">4–7</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sat">
+    <div class="time">22:00</div>
+    <div class="act-main"><div class="act-name">Oxyflux</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="oxyflux">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-oxyflux"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="oxyflux">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="oxyflux" data-plan-name="Oxyflux">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.8*</div>
+  </div>
+  <div class="act-row rankna" data-day="sat">
+    <div class="time">23:30</div>
+    <div class="act-main"><div class="act-name">FIRE SHOW</div></div>
+    <div class="badge rna">–</div>
+  </div>
+
+  <div class="day-hdr" data-day="sun">Sonntag, 28. Juni</div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">00:30</div>
+    <div class="act-main"><div class="act-name">Shenanigan</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="shenanigan">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-shenanigan"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="shenanigan">✕ Löschen</button></div></div>
+    <div class="badge rgpt">7.2*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">02:00</div>
+    <div class="act-main"><div class="act-name">Konebu</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="konebu">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-konebu"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="konebu">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="konebu" data-plan-name="Shenanigan">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.1*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">03:30</div>
+    <div class="act-main"><div class="act-name">Kala</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="kala">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-kala"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="kala">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="kala" data-plan-name="Konebu">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.0*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">05:00</div>
+    <div class="act-main"><div class="act-name">Intrapsyche</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="intrapsyche">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-intrapsyche"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="intrapsyche">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="intrapsyche" data-plan-name="Kala">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">7.8*</div>
+  </div>
+  <div class="act-row rankgpt" data-day="sun">
+    <div class="time">06:30</div>
+    <div class="act-main"><div class="act-name">Borderliners</div>
+      <div class="own-rating-wrap"><button type="button" class="own-rating-btn" data-id="borderliners">✎ Mein Rating</button></div><div class="own-rating-panel" id="panel-borderliners"><span class="own-rating-label">Dein Rating (0–10):</span><div class="star-row"><button type="button" class="star-btn" data-val="0">0</button><button type="button" class="star-btn" data-val="1">1</button><button type="button" class="star-btn" data-val="2">2</button><button type="button" class="star-btn" data-val="3">3</button><button type="button" class="star-btn" data-val="4">4</button><button type="button" class="star-btn" data-val="5">5</button><button type="button" class="star-btn" data-val="6">6</button><button type="button" class="star-btn" data-val="7">7</button><button type="button" class="star-btn" data-val="8">8</button><button type="button" class="star-btn" data-val="9">9</button><button type="button" class="star-btn" data-val="10">10</button></div><button type="button" class="own-clear-btn" data-id="borderliners">✕ Löschen</button></div></div>
+      <button type="button" class="plan-btn" data-plan-id="borderliners" data-plan-name="Intrapsyche">☆ Zu meinem Plan</button>
+    <div class="badge rgpt">8.0*</div>
+  </div>
+  <div class="act-row rankna" data-day="sun">
+    <div class="time">08:00</div>
+    <div class="act-main"><div class="act-name">END</div></div>
+    <div class="badge rna">–</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ ROUTING ══════════════════════════ -->
+<div class="routing-box" id="routing-box" style="display:none;">
+  <div class="conflict-box">
+    <strong>⚠️ Wichtigste Overlap-Entscheidungen</strong>
+    Fr 19:30 Omiki (Aurum, 9.0) vs. Findelkind (Prism, 8.4*) → Aurum<br>
+    Fr 21:00 Blastoyz (Aurum, 9.3) vs. Jimi Green (Prism, 8.2*) → Aurum
+  </div>
+
+  <div class="routing-day">
+    <div class="routing-day-hdr">Freitag, 26. Juni – "Der epische Aufbau"</div>
+    <div class="routing-entry"><div class="time">13:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Yekumi</div><div class="act-comment">Live, Flöte, Psybient</div></div><div class="badge r7">7.3</div></div>
+    <div class="routing-entry"><div class="time">14:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Liquid Soul</div></div><div class="badge r7">7.5</div></div>
+    <div class="routing-entry"><div class="time">15:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Sighter</div></div><div class="badge r8">8.9</div></div>
+    <div class="routing-entry"><div class="time">17:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Ranji</div></div><div class="badge r8">8.3</div></div>
+    <div class="routing-entry"><div class="time">18:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Rexalted ❤</div></div><div class="badge r9">9.0</div></div>
+    <div class="routing-entry"><div class="time">19:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Omiki</div><div class="act-comment">Nicht zu Findelkind Prism wechseln</div></div><div class="badge r9">9.0</div></div>
+    <div class="routing-entry"><div class="time">21:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Blastoyz 🏆</div><div class="act-comment">Peak des Festivals</div></div><div class="badge r9">9.3</div></div>
+    <div class="routing-entry"><div class="time">22:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Faders</div></div><div class="badge r8">8.2</div></div>
+    <div class="routing-entry end-row"><div class="time">00:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Ende Fr-Sequenz</div><div class="act-comment">Danach: Bliss 00:00 · Avalon 01:30 · optional weiterfeiern</div></div><div class="badge rna">–</div></div>
+  </div>
+
+  <div class="routing-day">
+    <div class="routing-day-hdr">Samstag, 27. Juni – "Breiter erkunden"</div>
+    <div class="routing-entry"><div class="time">00:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Bliss</div><div class="act-comment">Nacht Fr–Sa</div></div><div class="badge r8">8.1</div></div>
+    <div class="routing-entry end-row"><div class="time">01:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Bliss endet</div><div class="act-comment">Avalon 01:30 · Arjuna 03:00 · optional oder Schlaf</div></div><div class="badge rna">–</div></div>
+    <div class="routing-entry"><div class="time">10:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Silent Sphere</div></div><div class="badge r7">7.8</div></div>
+    <div class="routing-entry"><div class="time">12:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Murphy Haze</div></div><div class="badge rgpt">8.1*</div></div>
+    <div class="routing-entry end-row"><div class="time">13:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Murphy Haze endet</div><div class="act-comment">7Eleven vs. Ebrax 13:30 läuft weiter auf Aurum</div></div><div class="badge rna">–</div></div>
+    <div class="routing-entry"><div class="time">13:30</div><div class="rstage curame">CURAME</div><div class="act-main"><div class="act-name">Itotia</div><div class="act-comment">Cacao Dance – Alternative zu 7Eleven vs. Ebrax</div></div><div class="badge rgpt">8.5*</div></div>
+    <div class="routing-entry"><div class="time">16:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Phaxe</div></div><div class="badge r7">7.7</div></div>
+    <div class="routing-entry"><div class="time">18:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Asgard</div></div><div class="badge r8">8.0</div></div>
+    <div class="routing-entry"><div class="time">19:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Merkaba</div></div><div class="badge r8">8.0</div></div>
+    <div class="routing-entry"><div class="time">21:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Astrix</div></div><div class="badge r8">8.3</div></div>
+    <div class="routing-entry end-row"><div class="time">22:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Astrix endet</div><div class="act-comment">Kalya Scintilla läuft seit 21:30 auf Curame</div></div><div class="badge rna">–</div></div>
+    <div class="routing-entry"><div class="time">21:30</div><div class="rstage curame">CURAME</div><div class="act-main"><div class="act-name">Kalya Scintilla</div><div class="act-comment">DJ Set – parallel zu Astrix</div></div><div class="badge r8">8.2</div></div>
+    <div class="routing-entry"><div class="time">22:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Sajanka</div><div class="act-comment">Kein Gegner auf Curame Sa 22:30</div></div><div class="badge r8">6–8.5</div></div>
+    <div class="routing-entry end-row"><div class="time">23:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Sajanka endet – Fire Show</div><div class="act-comment">Fire Show 23:30 · danach Nacht So beginnt</div></div><div class="badge rna">–</div></div>
+  </div>
+
+  <div class="routing-day">
+    <div class="routing-day-hdr">Sonntag, 28. Juni – "Sauber landen"</div>
+    <div class="routing-entry"><div class="time">01:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Antinomy</div><div class="act-comment">Nacht Sa–So</div></div><div class="badge r8">8.2</div></div>
+    <div class="routing-entry end-row"><div class="time">03:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Antinomy endet</div><div class="act-comment">Starlab 03:00 · Henrique Camacho 04:30 · Break 06:00 · optional oder Schlaf</div></div><div class="badge rna">–</div></div>
+    <div class="routing-entry"><div class="time">09:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Schameleon</div></div><div class="badge r7">7.5</div></div>
+    <div class="routing-entry"><div class="time">12:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Hatikwa</div></div><div class="badge r7">7.5</div></div>
+    <div class="routing-entry"><div class="time">13:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Bassforscher</div></div><div class="badge rgpt">7.8*</div></div>
+    <div class="routing-entry"><div class="time">14:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Aura Vortex</div></div><div class="badge r8">8.3</div></div>
+    <div class="routing-entry"><div class="time">15:30</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">Emok ★</div><div class="act-comment">EPIC – würdiger Abschluss</div></div><div class="badge r9">9.0</div></div>
+    <div class="routing-entry end-row"><div class="time">17:00</div><div class="rstage aurum">AURUM</div><div class="act-main"><div class="act-name">⏹ Emok endet – Festival Ende</div><div class="act-comment">Aurum schliesst 17:00 · Festival offiziell vorbei</div></div><div class="badge rna">–</div></div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ── STORAGE ────────────────────────────────────────────
+var STORE_KEY  = 'bm2026_v1';
+var PLAN_KEY   = 'bm2026_plan';
+var ownRatings = {};
+var myPlan     = {};
+try { ownRatings = JSON.parse(localStorage.getItem(STORE_KEY)||'{}') || {}; } catch(e) {}
+try { myPlan     = JSON.parse(localStorage.getItem(PLAN_KEY) ||'{}') || {}; } catch(e) {}
+
+function saveRatings() { try { localStorage.setItem(STORE_KEY, JSON.stringify(ownRatings)); } catch(e) {} }
+function savePlan()    { try { localStorage.setItem(PLAN_KEY,  JSON.stringify(myPlan));     } catch(e) {} }
+
+// ── OVERLAP DATA ───────────────────────────────────────
+var overlaps = [
+  { a:'rexalted', b:null,         tip:'tip-r1' },
+  { a:'omiki',    b:'findelkind', tip:'tip-r2' },
+  { a:'blastoyz', b:'jimi-green', tip:'tip-r3' },
+];
+
+// ── HELPERS ────────────────────────────────────────────
+function rankClass(v) { return v>=9?'own-rank9':v>=8?'own-rank8':v>=7?'own-rank7':'own-rank-low'; }
+function badgeCls(v)  { return v>=9?'or9':v>=8?'or8':v>=7?'or7':'or-low'; }
+function starCls(v)   { return v>=9?'cur9':v>=8?'cur8':v>=7?'cur7':'cur-low'; }
+
+function closeAll() {
+  document.querySelectorAll('.own-rating-panel.open').forEach(function(p) { p.classList.remove('open'); });
+  document.querySelectorAll('.ov-tooltip.open').forEach(function(t) { t.classList.remove('open'); });
+}
+
+// ── APPLY RATING ───────────────────────────────────────
+function applyRating(id, val) {
+  if (val===null) delete ownRatings[id]; else ownRatings[id]=val;
+  saveRatings();
+  document.querySelectorAll('.own-rating-btn[data-id="'+id+'"]').forEach(function(btn) {
+    var row = btn.closest('.act-row');
+    if (!row) return;
+    row.classList.remove('own-rank9','own-rank8','own-rank7','own-rank-low');
+    var prev = row.querySelector('[data-own="'+id+'"]');
+    if (prev) prev.remove();
+    if (val!==null) {
+      row.classList.add(rankClass(val));
+      var jb = row.querySelector('.badge:not([data-own])');
+      if (jb) {
+        var ob = document.createElement('span');
+        ob.className='own-badge '+badgeCls(val);
+        ob.setAttribute('data-own',id);
+        ob.title='Mein Rating';
+        ob.textContent='me:'+val;
+        jb.parentNode.insertBefore(ob,jb.nextSibling);
+      }
+      btn.textContent='★ '+val+' (mein)';
+      btn.classList.add('has-own');
+    } else {
+      btn.textContent='✎ Mein Rating';
+      btn.classList.remove('has-own');
+    }
+    var panel = document.getElementById('panel-'+id);
+    if (panel) {
+      panel.querySelectorAll('.star-btn').forEach(function(sb) {
+        sb.classList.remove('cur9','cur8','cur7','cur-low');
+        if (val!==null && parseInt(sb.dataset.val)===val) sb.classList.add(starCls(val));
+      });
+    }
+  });
+  applyFilter(currentFilter);
+  updateOverlaps();
+}
+
+// ── MY PLAN ────────────────────────────────────────────
+function togglePlan(id, name, btn) {
+  if (myPlan[id]) {
+    delete myPlan[id];
+    btn.textContent = '☆ Zu meinem Plan';
+    btn.classList.remove('added');
+  } else {
+    // Gather stage, day, time from row
+    var row = btn.closest('.act-row');
+    var time = row ? (row.querySelector('.time')||{}).textContent || '' : '';
+    var day  = row ? (row.dataset.day || '') : '';
+    var stageBlock = row ? row.closest('[id^="block-"]') : null;
+    var stage = stageBlock ? stageBlock.id.replace('block-','') : '';
+    myPlan[id] = { name:name, time:time, day:day, stage:stage };
+    btn.textContent = '★ Im Plan';
+    btn.classList.add('added');
+  }
+  savePlan();
+}
+
+function restorePlanButtons() {
+  Object.keys(myPlan).forEach(function(id) {
+    document.querySelectorAll('[data-plan-id="'+id+'"]').forEach(function(btn) {
+      btn.textContent = '★ Im Plan';
+      btn.classList.add('added');
+    });
+  });
+}
+
+// ── NOW PLAYING ────────────────────────────────────────
+function timeToMinutes(t) {
+  var p = t.trim().split(':');
+  if (p.length < 2) return -1;
+  return parseInt(p[0])*60 + parseInt(p[1]);
+}
+function getDayKey() {
+  var d = new Date();
+  var day = d.getDay(); // 0=Sun,1=Mon...4=Thu,5=Fri,6=Sat
+  // Festival: Thu=25, Fri=26, Sat=27, Sun=28 June 2026
+  var date = d.getDate();
+  var month = d.getMonth(); // 5 = June
+  var year = d.getFullYear();
+  if (year===2026 && month===5) {
+    if (date===25) return 'thu';
+    if (date===26) return 'fri';
+    if (date===27) return 'sat';
+    if (date===28) return 'sun';
+  }
+  return null;
+}
+
+function updateNowPlaying() {
+  // Clear existing markers
+  document.querySelectorAll('.act-row.now-playing, .act-row.coming-next').forEach(function(r) {
+    r.classList.remove('now-playing','coming-next');
+  });
+
+  var dayKey = getDayKey();
+  if (!dayKey) return; // not during festival
+
+  var now = new Date();
+  var nowMin = now.getHours()*60 + now.getMinutes();
+
+  // Find all act-rows for today, per stage
+  ['block-aurum','block-curame','block-prism'].forEach(function(blockId) {
+    var block = document.getElementById(blockId);
+    if (!block) return;
+    var rows = Array.from(block.querySelectorAll('.act-row[data-day="'+dayKey+'"]:not(.end-row)'));
+    if (!rows.length) return;
+
+    // For each row, get start time. End time = next row's start time
+    var timed = rows.map(function(row, i) {
+      var t = row.querySelector('.time');
+      return { row:row, min: t ? timeToMinutes(t.textContent) : -1 };
+    }).filter(function(x) { return x.min >= 0; });
+
+    var nowPlaying = null;
+    var nextUp = null;
+
+    for (var i=0; i<timed.length; i++) {
+      var start = timed[i].min;
+      var end   = i+1 < timed.length ? timed[i+1].min : start+90;
+      // Handle overnight (e.g. 23:30 -> 01:30)
+      if (end < start) end += 24*60;
+      var curMin = nowMin < start-120 ? nowMin+24*60 : nowMin; // wraparound fix
+      if (curMin >= start && curMin < end) {
+        nowPlaying = timed[i].row;
+      } else if (!nextUp && curMin < start) {
+        nextUp = timed[i].row;
+      }
+    }
+    if (nowPlaying) nowPlaying.classList.add('now-playing');
+    if (nextUp)    nextUp.classList.add('coming-next');
+  });
+}
+
+// ── SEARCH ─────────────────────────────────────────────
+var searchTimer = null;
+function doSearch(query) {
+  var q = query.trim().toLowerCase();
+  var clearBtn = document.getElementById('search-clear');
+  if (clearBtn) clearBtn.classList.toggle('visible', q.length > 0);
+
+  document.querySelectorAll('.act-row').forEach(function(row) {
+    if (row.classList.contains('end-row')) return;
+    if (!q) {
+      row.classList.remove('search-hidden');
+      return;
+    }
+    var nameEl = row.querySelector('.act-name');
+    var name = nameEl ? nameEl.textContent.toLowerCase() : '';
+    var comment = row.querySelector('.act-comment');
+    var commentTxt = comment ? comment.textContent.toLowerCase() : '';
+    var match = name.includes(q) || commentTxt.includes(q);
+    row.classList.toggle('search-hidden', !match);
+  });
+}
+
+// ── DAY FILTER ─────────────────────────────────────────
+var currentDay = 'all';
+function applyDayFilter(day) {
+  currentDay = day;
+  document.querySelectorAll('.dbtn').forEach(function(b) { b.classList.remove('active'); });
+  var db = document.querySelector('[data-day="'+day+'"]');
+  if (db) db.classList.add('active');
+
+  // Show/hide day-hdr and act-rows
+  ['block-aurum','block-curame','block-prism'].forEach(function(blockId) {
+    var block = document.getElementById(blockId);
+    if (!block) return;
+    block.querySelectorAll('.day-hdr').forEach(function(dh) {
+      dh.style.display = (day==='all' || dh.dataset.day===day) ? '' : 'none';
+    });
+    block.querySelectorAll('.act-row:not(.end-row)').forEach(function(row) {
+      var rowDay = row.dataset.day || '';
+      row.classList.toggle('day-hidden', day!=='all' && rowDay!==day);
+    });
+    block.querySelectorAll('.tod-hdr').forEach(function(th) {
+      // tod headers: hide if day filtered and no visible rows follow
+      th.style.display = day==='all' ? '' : 'none';
+    });
+  });
+}
+
+// ── TAB SWITCHING ──────────────────────────────────────
+var currentTab = 'all';
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  var at = document.querySelector('[data-tab="'+tab+'"]');
+  if (at) at.classList.add('active');
+  ['block-aurum','block-curame','block-prism','routing-box'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.style.display='none';
+  });
+  var searchWrap = document.querySelector('.search-wrap');
+  var dayBar     = document.querySelector('.day-bar');
+  var filterBar  = document.querySelector('.filter-bar');
+  if (tab==='all') {
+    ['block-aurum','block-curame','block-prism'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.style.display='';
+    });
+    if (searchWrap) searchWrap.style.display='';
+    if (dayBar) dayBar.style.display='';
+    if (filterBar) filterBar.style.display='';
+  } else if (tab==='routing') {
+    var rb = document.getElementById('routing-box'); if (rb) rb.style.display='block';
+    if (searchWrap) searchWrap.style.display='none';
+    if (dayBar) dayBar.style.display='none';
+    if (filterBar) filterBar.style.display='none';
+  } else {
+    var bl = document.getElementById('block-'+tab); if (bl) bl.style.display='';
+    if (searchWrap) searchWrap.style.display='';
+    if (dayBar) dayBar.style.display='';
+    if (filterBar) filterBar.style.display='';
+  }
+  applyFilter(currentFilter);
+  applyDayFilter(currentDay);
+}
+
+// ── RATING FILTER ──────────────────────────────────────
+var currentFilter = 'all';
+function applyFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('active'); });
+  var fb = document.querySelector('[data-filter="'+f+'"]');
+  if (fb) fb.classList.add('active');
+  document.querySelectorAll('.act-row').forEach(function(row) {
+    if (row.classList.contains('end-row')) return;
+    var btn2 = row.querySelector('.own-rating-btn');
+    var eff = 'na';
+    if (btn2) {
+      var id2 = btn2.dataset.id;
+      if (ownRatings[id2]!==undefined) {
+        var v = ownRatings[id2];
+        eff = v>=9?'9':v>=8?'8':v>=7?'7':'low';
+      }
+    }
+    if (eff==='na') {
+      eff = row.classList.contains('rank9')?'9':row.classList.contains('rank8')?'8':row.classList.contains('rank7')?'7':'na';
+    }
+    var hide = f==='9'?(eff!=='9'):f==='8'?(eff!=='9'&&eff!=='8'):f==='7'?(eff!=='9'&&eff!=='8'&&eff!=='7'):false;
+    row.classList.toggle('hidden-by-filter', hide);
+  });
+}
+
+// ── OVERLAP UPDATE ─────────────────────────────────────
+function getEffRating(id) {
+  if (ownRatings[id]!==undefined) return {v:ownRatings[id],src:'mein'};
+  var btn = document.querySelector('.own-rating-btn[data-id="'+id+'"]');
+  if (!btn) return null;
+  var row = btn.closest('.act-row');
+  if (!row) return null;
+  var badge = row.querySelector('.badge:not([data-own])');
+  if (!badge) return null;
+  var n = parseFloat(badge.textContent.replace(/[^0-9.]/g,''));
+  return isNaN(n)?null:{v:n,src:'Johannes'};
+}
+function updateOverlaps() {
+  overlaps.forEach(function(o) {
+    var rA=getEffRating(o.a), rB=o.b?getEffRating(o.b):null;
+    if (!rA) return;
+    var aWins=!rB||rA.v>=rB.v;
+    document.querySelectorAll('[data-tip="'+o.tip+'"]').forEach(function(badge) {
+      var row=badge.closest('.act-row');
+      var isA=row&&!!row.querySelector('.own-rating-btn[data-id="'+o.a+'"]');
+      badge.className='overlap-badge '+((aWins===isA)?'ov-go':'ov-skip');
+      badge.textContent=(aWins===isA)?'✓ Hier bleiben':'→ Dort besser';
+    });
+    var tip=document.getElementById(o.tip);
+    if (tip&&rA&&rB) {
+      var changed=ownRatings[o.a]!==undefined||(o.b&&ownRatings[o.b]!==undefined);
+      tip.textContent=o.a.replace(/-/g,' ')+'('+rA.src+': '+rA.v+') vs '+o.b.replace(/-/g,' ')+'('+rB.src+': '+rB.v+')'+(changed?' – durch dein Rating angepasst':'');
+    }
+  });
+}
+
+// ── TIME-OF-DAY HEADERS ────────────────────────────────
+function todInfo(t) {
+  var p=t.split(':'),h=parseInt(p[0])+parseInt(p[1])/60;
+  if (h<6)  return {cls:'tod-night',  lbl:'🌙 Nacht · 00–06'};
+  if (h<12) return {cls:'tod-morning',lbl:'🌅 Morgen · 06–12'};
+  if (h<18) return {cls:'tod-day',    lbl:'☀️ Tag · 12–18'};
+  return           {cls:'tod-evening',lbl:'🌆 Abend · 18–24'};
+}
+function buildTodHeaders() {
+  ['block-aurum','block-curame','block-prism'].forEach(function(blockId) {
+    var block=document.getElementById(blockId);
+    if (!block) return;
+    block.querySelectorAll('.day-hdr').forEach(function(dh) {
+      var last=null,s=dh.nextElementSibling;
+      while (s&&!s.classList.contains('day-hdr')) {
+        if (s.classList.contains('act-row')) {
+          var te=s.querySelector('.time');
+          if (te) {
+            var info=todInfo(te.textContent.trim());
+            if (info.cls!==last) {
+              var d=document.createElement('div');
+              d.className='tod-hdr '+info.cls;
+              d.textContent=info.lbl;
+              block.insertBefore(d,s);
+              last=info.cls;
+            }
+          }
+        }
+        s=s.nextElementSibling;
+      }
+    });
+  });
+}
+
+// ── COMPACT TOGGLE ─────────────────────────────────────
+var isCompact = false;
+function toggleCompact() {
+  isCompact = !isCompact;
+  document.querySelectorAll('.stage-block').forEach(function(b) {
+    b.classList.toggle('compact', isCompact);
+  });
+  var btn = document.getElementById('btn-compact');
+  if (btn) {
+    btn.classList.toggle('active', isCompact);
+    btn.textContent = isCompact ? '⚡ Normal' : '⚡ Kompakt';
+  }
+}
+
+// ── MAIN EVENT LISTENER ────────────────────────────────
+function handleClick(e) {
+  var tgt = e.target;
+
+  var tabBtn = tgt.closest ? tgt.closest('button[data-tab]') : null;
+  if (tabBtn && tabBtn.classList.contains('tab')) {
+    closeAll(); setTab(tabBtn.dataset.tab); return;
+  }
+  var fBtn = tgt.closest ? tgt.closest('button[data-filter]') : null;
+  if (fBtn && fBtn.classList.contains('fbtn')) {
+    applyFilter(fBtn.dataset.filter); return;
+  }
+  var dBtn = tgt.closest ? tgt.closest('button[data-day]') : null;
+  if (dBtn && dBtn.classList.contains('dbtn')) {
+    applyDayFilter(dBtn.dataset.day); return;
+  }
+  var ratingBtn = tgt.closest ? tgt.closest('.own-rating-btn') : null;
+  if (ratingBtn) {
+    e.stopPropagation();
+    var id=ratingBtn.dataset.id;
+    var panel=document.getElementById('panel-'+id);
+    if (!panel) return;
+    var wasOpen=panel.classList.contains('open');
+    closeAll();
+    if (!wasOpen) panel.classList.add('open');
+    return;
+  }
+  if (tgt.classList&&tgt.classList.contains('star-btn')) {
+    e.stopPropagation();
+    var panel2=tgt.closest('.own-rating-panel');
+    if (!panel2) return;
+    var id2=panel2.id.replace('panel-','');
+    applyRating(id2,parseInt(tgt.dataset.val));
+    panel2.classList.remove('open');
+    return;
+  }
+  if (tgt.classList&&tgt.classList.contains('own-clear-btn')) {
+    e.stopPropagation();
+    var id3=tgt.dataset.id;
+    applyRating(id3,null);
+    var panel3=document.getElementById('panel-'+id3);
+    if (panel3) panel3.classList.remove('open');
+    return;
+  }
+  var planBtn = tgt.closest ? tgt.closest('.plan-btn') : null;
+  if (planBtn) {
+    e.stopPropagation();
+    togglePlan(planBtn.dataset.planId, planBtn.dataset.planName, planBtn);
+    return;
+  }
+  var obadge = tgt.closest ? tgt.closest('.overlap-badge') : null;
+  if (obadge) {
+    e.stopPropagation();
+    var tip=document.getElementById(obadge.dataset.tip);
+    var was=tip&&tip.classList.contains('open');
+    closeAll();
+    if (!was&&tip) tip.classList.add('open');
+    return;
+  }
+  var toolBtn = tgt.closest ? tgt.closest('.tool-btn') : null;
+  if (toolBtn) {
+    var bid = toolBtn.id;
+    if (bid==='btn-compact') { toggleCompact(); return; }
+    if (bid==='btn-now') {
+      updateNowPlaying();
+      // scroll to first now-playing
+      var np = document.querySelector('.act-row.now-playing');
+      if (np) np.scrollIntoView({behavior:'smooth',block:'center'});
+      else alert('Kein laufender Act gefunden.\n(Funktioniert nur während des Festivals: 25.–28. Juni 2026)');
+      return;
+    }
+    if (bid==='btn-refresh') {
+      if ('serviceWorker' in navigator) {
+        caches.keys().then(function(keys) {
+          return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+        }).then(function() { window.location.reload(); });
+      } else { window.location.reload(); }
+      return;
+    }
+    return;
+  }
+  closeAll();
+}
+
+document.addEventListener('click', handleClick);
+document.addEventListener('touchend', function(e) { handleClick(e); }, {passive:false});
+
+// Direct tab/filter listeners for iOS belt-and-suspenders
+document.querySelectorAll('.tab[data-tab]').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation(); closeAll(); setTab(this.dataset.tab);
+  });
+});
+document.querySelectorAll('.fbtn[data-filter]').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation(); applyFilter(this.dataset.filter);
+  });
+});
+document.querySelectorAll('.dbtn[data-day]').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation(); applyDayFilter(this.dataset.day);
+  });
+});
+
+// Search input
+var searchInput = document.getElementById('search-input');
+var searchClear = document.getElementById('search-clear');
+if (searchInput) {
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() { doSearch(searchInput.value); }, 150);
+  });
+}
+if (searchClear) {
+  searchClear.addEventListener('click', function() {
+    searchInput.value='';
+    doSearch('');
+    searchInput.focus();
+  });
+}
+
+// ── INIT ───────────────────────────────────────────────
+buildTodHeaders();
+Object.keys(ownRatings).forEach(function(id) { applyRating(id, ownRatings[id]); });
+restorePlanButtons();
+updateOverlaps();
+updateNowPlaying();
+// Update now-playing every minute
+setInterval(updateNowPlaying, 60000);
+
+})();
+
+</script>
+</body>
+</html>
