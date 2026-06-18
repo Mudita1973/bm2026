@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BM2026">
+<link rel="apple-touch-icon" href="bm2026-icon.png">
+<link rel="manifest" href="manifest.json">
+<title>BM2026 – Festival Crossover</title>
+<style>
+  :root {
+    --bg:#080b14; --surface:#0f1422; --border:#1e2a40;
+    --text:#d4daf0; --muted:#5a6688;
+    --bm:#f59e0b; --is:#a855f7; --oz:#10b981;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    padding:20px 14px 60px; max-width:700px; margin:0 auto;
+  }
+
+  /* ── HEADER ── */
+  header { text-align:center; margin-bottom:22px; }
+  header h1 {
+    font-size:20px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+    background:linear-gradient(90deg,#f59e0b,#a855f7,#10b981);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom:4px;
+  }
+  header p { color:var(--muted); font-size:12px; }
+
+  /* ── NAV ── */
+  .nav { display:flex; gap:6px; justify-content:center; margin-bottom:22px; flex-wrap:wrap; }
+  .nav a {
+    padding:7px 14px; border-radius:999px; border:1px solid var(--border);
+    background:var(--surface); color:var(--muted); text-decoration:none;
+    font-size:12px; font-weight:600; touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent; min-height:40px;
+    display:inline-flex; align-items:center;
+  }
+  .nav a:hover { color:var(--text); }
+  .nav a.active { background:#1a1200; color:#fcd34d; border-color:var(--bm); }
+
+  /* ── LEGEND ── */
+  .legend {
+    display:flex; gap:12px; flex-wrap:wrap;
+    justify-content:center; margin-bottom:20px;
+  }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
+  .fest-pill {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700;
+  }
+  .pill-bm  { background:#1a1200; color:#fcd34d; border:1px solid #f59e0b55; }
+  .pill-is  { background:#1a0a30; color:#c4b5fd; border:1px solid #a855f755; }
+  .pill-oz  { background:#051a10; color:#6ee7b7; border:1px solid #10b98155; }
+
+  /* ── FILTER TABS ── */
+  .filter-bar { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+  .fbtn {
+    padding:7px 14px; border-radius:999px; border:1px solid var(--border);
+    background:var(--surface); color:var(--muted); cursor:pointer;
+    font-size:11px; font-weight:600; font-family:inherit; -webkit-appearance:none;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+    min-height:38px; transition:all 0.15s;
+  }
+  .fbtn.active { background:#0f1e30; color:#93c5fd; border-color:#3b82f6; }
+
+  /* ── SECTION ── */
+  .section { margin-bottom:24px; }
+  .section-title {
+    font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    color:var(--muted); padding:6px 14px 5px;
+    border-bottom:1px solid var(--border); margin-bottom:0;
+    background:#0c111e; border-radius:8px 8px 0 0;
+    border:1px solid var(--border); border-bottom:none;
+  }
+
+  /* ── ACT ROWS ── */
+  .act-row {
+    display:grid; grid-template-columns:28px 1fr auto;
+    align-items:start; padding:10px 14px;
+    border-bottom:1px solid #0f1728; background:var(--surface);
+    gap:10px; position:relative; border-left:1px solid var(--border);
+    border-right:1px solid var(--border);
+  }
+  .act-row:last-child { border-bottom:1px solid var(--border); border-radius:0 0 8px 8px; }
+  .act-row:hover { background:#121a2e; }
+  .act-row::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:0;
+  }
+  .r9::before  { background:#c026d3; }
+  .r8::before  { background:#2563eb; }
+  .r7::before  { background:#0891b2; }
+  .rank-num {
+    font-size:11px; font-weight:700; color:var(--muted);
+    font-variant-numeric:tabular-nums; padding-top:2px;
+    text-align:center;
+  }
+  .act-info {}
+  .act-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .act-name a { color:#ff4444; text-decoration:none; margin-right:5px; font-size:11px; }
+  .act-festivals { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; }
+  .act-comment { font-size:10px; color:var(--muted); margin-top:3px; line-height:1.35; }
+  .badge-col { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+  .badge {
+    width:38px; height:24px; border-radius:5px; display:flex; align-items:center;
+    justify-content:center; font-size:11px; font-weight:700;
+  }
+  .bd9  { background:#4a0070; color:#e879f9; border:1px solid #c026d3; }
+  .bd8  { background:#0f2060; color:#93c5fd; border:1px solid #2563eb; }
+  .bd7  { background:#072830; color:#67e8f9; border:1px solid #0891b2; }
+  .bd-gpt { background:#181818; color:#555; border:1px solid #333; font-size:9px; }
+  .badge-label { font-size:8px; color:var(--muted); text-align:center; }
+
+  /* ── INTRO BOX ── */
+  .intro {
+    background:#0a1000; border:1px solid #f59e0b33; border-radius:8px;
+    padding:12px 14px; margin-bottom:20px; font-size:12px;
+    color:#a0b070; line-height:1.7;
+  }
+  .intro strong { color:#fcd34d; display:block; margin-bottom:4px; font-size:13px; }
+
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Festival Crossover 2026</h1>
+  <p>Acts die neben Burning Mountain noch bei anderen Festivals spielen · nach Rating</p>
+</header>
+
+<div class="nav">
+  <a href="index.html">← Zeitplan</a>
+  <a href="crossover.html" class="active">🎪 Crossover</a>
+</div>
+
+<div class="intro">
+  <strong>Warum das relevant ist:</strong>
+  Acts die auch bei Indian Spirit oder Ozora spielen, kann man dort nochmal erleben falls man sie in Zernez verpasst. Das macht die Entscheidung bei Overlaps einfacher – wer nur bei Burning Mountain ist, hat höhere Priorität.
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="fest-pill pill-bm">🔥 BM</span> Burning Mountain</div>
+  <div class="legend-item"><span class="fest-pill pill-is">🪶 IS</span> Indian Spirit</div>
+  <div class="legend-item"><span class="fest-pill pill-oz">🌿 OZ</span> Ozora</div>
+</div>
+
+<div class="filter-bar">
+  <button type="button" class="fbtn active" data-filter="all">Alle</button>
+  <button type="button" class="fbtn" data-filter="is">+ Indian Spirit</button>
+  <button type="button" class="fbtn" data-filter="oz">+ Ozora</button>
+  <button type="button" class="fbtn" data-filter="all3">Alle 3 Festivals</button>
+</div>
+
+<!-- SECTION: ALL 3 -->
+<div class="section" id="sec-all3">
+  <div class="section-title">🏆 Alle 3 Festivals – Burning Mountain + Indian Spirit + Ozora</div>
+
+  <div class="act-row r8" data-is="1" data-oz="1">
+    <div class="rank-num">1</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=1-ccS5614j0" target="_blank">▶</a>Astrix</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+        <span class="fest-pill pill-oz">🌿 OZ</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd8">8.3</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: BM + INDIAN SPIRIT -->
+<div class="section" id="sec-is">
+  <div class="section-title">🪶 Burning Mountain + Indian Spirit</div>
+
+  <div class="act-row r9" data-is="1" data-oz="0">
+    <div class="rank-num">1</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=yWDYhfWPu-U" target="_blank">▶</a>Blastoyz</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">"Richtig gut zum drauf abgehen!!!"</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd9">9.3</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r9" data-is="1" data-oz="0">
+    <div class="rank-num">2</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=b_m9pJBQuiE" target="_blank">▶</a>Emok</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">EPIC – Indian Spirit Veteran</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd9">9.0</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r8" data-is="1" data-oz="0">
+    <div class="rank-num">3</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=brJOhEq8oWc" target="_blank">▶</a>Sighter</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd8">8.9</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r8" data-is="1" data-oz="0">
+    <div class="rank-num">4</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=P1F8BSj_m5g" target="_blank">▶</a>Aura Vortex</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">Freund von Bill – Ozora-Kontext</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd8">8.3</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r8" data-is="1" data-oz="0">
+    <div class="rank-num">5</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=RX-JnIAEBVo" target="_blank">▶</a>Bliss</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">Live-Gitarre, psychedelic rock</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd8">8.1</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r8" data-is="1" data-oz="0">
+    <div class="rank-num">6</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=mvVQNMrxUaI" target="_blank">▶</a>ASGARD</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd8">8.0</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="1" data-oz="0">
+    <div class="rank-num">7</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=SdsKKXy57hw" target="_blank">▶</a>Phaxe</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">7.7</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="1" data-oz="0">
+    <div class="rank-num">8</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=msLPFTbyP30" target="_blank">▶</a>Henrique Camacho</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">With lots of hardstyle parts</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">7.6</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="1" data-oz="0">
+    <div class="rank-num">9</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=rTRvCORTIZA" target="_blank">▶</a>Hatikwa</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">7.5</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="1" data-oz="0">
+    <div class="rank-num">10</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=DQXK3_DWubY" target="_blank">▶</a>Liquid Soul</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">7.5</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="1" data-oz="0">
+    <div class="rank-num">11</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=X5elsxNTdt8" target="_blank">▶</a>Schameleon</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">Fast, groovy, zieht einen rein</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">7.5</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="1" data-oz="0">
+    <div class="rank-num">12</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=dobgAZhmTmM" target="_blank">▶</a>Yekumi</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-is">🪶 IS</span>
+      </div>
+      <div class="act-comment">Live, Flöte, Psybient-Mix</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">7.3</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: BM + OZORA -->
+<div class="section" id="sec-oz">
+  <div class="section-title">🌿 Burning Mountain + Ozora</div>
+
+  <div class="act-row r9" data-is="0" data-oz="1">
+    <div class="rank-num">1</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=6yswV6BpipE" target="_blank">▶</a>Omiki</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-oz">🌿 OZ</span>
+      </div>
+      <div class="act-comment">BM Sunset Set 2025 verfügbar</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd9">9.0</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r8" data-is="0" data-oz="1">
+    <div class="rank-num">2</div>
+    <div class="act-info">
+      <div class="act-name"><a href="https://www.youtube.com/watch?v=KTDJVwB_A3Y" target="_blank">▶</a>Kalya Scintilla</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-oz">🌿 OZ</span>
+      </div>
+      <div class="act-comment">Ozora Dome 2025 Set verfügbar</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd8">8.2</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="0" data-oz="1">
+    <div class="rank-num">3</div>
+    <div class="act-info">
+      <div class="act-name">Sajanka</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-oz">🌿 OZ</span>
+      </div>
+      <div class="act-comment">Indische Vibes, sehr aktivierend</div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">6–8.5</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+
+  <div class="act-row r7" data-is="0" data-oz="1">
+    <div class="rank-num">4</div>
+    <div class="act-info">
+      <div class="act-name">Starlab</div>
+      <div class="act-festivals">
+        <span class="fest-pill pill-bm">🔥 BM</span>
+        <span class="fest-pill pill-oz">🌿 OZ</span>
+      </div>
+    </div>
+    <div class="badge-col">
+      <div class="badge bd7">6.8</div>
+      <div class="badge-label">eigenes</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Filter buttons
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.fbtn');
+    if (!btn) return;
+    var f = btn.dataset.filter;
+    document.querySelectorAll('.fbtn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+
+    var secAll3 = document.getElementById('sec-all3');
+    var secIs   = document.getElementById('sec-is');
+    var secOz   = document.getElementById('sec-oz');
+
+    if (f === 'all') {
+      secAll3.classList.remove('hidden');
+      secIs.classList.remove('hidden');
+      secOz.classList.remove('hidden');
+    } else if (f === 'is') {
+      secAll3.classList.add('hidden');
+      secIs.classList.remove('hidden');
+      secOz.classList.add('hidden');
+    } else if (f === 'oz') {
+      secAll3.classList.add('hidden');
+      secIs.classList.add('hidden');
+      secOz.classList.remove('hidden');
+    } else if (f === 'all3') {
+      secAll3.classList.remove('hidden');
+      secIs.classList.add('hidden');
+      secOz.classList.add('hidden');
+    }
+  });
+})();
+</script>
+</body>
+</html>
